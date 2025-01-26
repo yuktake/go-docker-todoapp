@@ -1,5 +1,5 @@
 # Ignore the application env file
-application/.env
+application/*
 
 # Ignore the application air tmp main file
 application/tmp/main

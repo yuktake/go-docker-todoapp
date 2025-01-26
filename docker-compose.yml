@@ -11,6 +11,9 @@ services:
       - "8000:8000"
     # airコマンドでgoファイルを監視しているのはわかるが、ポートはどうなっているのか？
     command: air -d
+    # 値を変更するたびにビルドしないと反映されない
+    # envファイルを読み込んで、osの環境変数にセットしてくれている
+    # envファイルから動的に読み込みたい場合はgithub.com/joho/godotenvなどを使い、アプリケーションから直接envファイルを読み込むようにする
     env_file:
       - application/.env
     networks:

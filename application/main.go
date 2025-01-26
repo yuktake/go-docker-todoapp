@@ -75,7 +75,7 @@ func formatDateTime(d time.Time) string {
 }
 
 func main() {
-	sqldb, err := sql.Open("postgres", "host=db port=5432 user=postgres password=password dbname=todo-webapp sslmode=disable")
+	sqldb, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Println(os.Getenv("DATABASE_URL"))
 		log.Fatal(err)

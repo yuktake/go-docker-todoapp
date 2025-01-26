@@ -1,0 +1,21 @@
+services:
+  app:
+    platform: linux/x86_64
+    container_name: app
+    build:
+      context: .
+      dockerfile: containers/go/Dockerfile
+    volumes:
+      - ./application:/usr/local/go/src/go_crm
+    ports:
+      - "8000:8000"
+    # airコマンドでgoファイルを監視しているのはわかるが、ポートはどうなっているのか？
+    command: air -d
+    env_file:
+      - application/.env
+    networks:
+      - posgresql_default
+
+networks:
+  posgresql_default:
+    external: true

@@ -16,7 +16,12 @@ import (
 
 	_ "github.com/lib/pq"
 
+	jwtv5 "github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/extra/bundebug"
@@ -27,6 +32,12 @@ var static embed.FS
 
 //go:embed templates
 var templates embed.FS
+
+type JwtCustomClaims struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	jwtv5.RegisteredClaims
+}
 
 type Todo struct {
 	bun.BaseModel `bun:"table:todos,alias:t"`
@@ -43,6 +54,26 @@ type Todo struct {
 type Data struct {
 	Todos  []Todo
 	Errors []error
+}
+
+// initEnvは.envファイルから環境変数を読み込みます
+func initEnv() error {
+	err := godotenv.Load()
+	if err != nil {
+		return fmt.Errorf(".envファイルの読み込みに失敗しました: %v", err)
+	}
+
+	if os.Getenv("JWT_SECRET") == "" {
+		return fmt.Errorf("JWT_SECRETが.envファイルに設定されていません")
+	}
+
+	return nil
+}
+
+// configureMiddlewareはEchoに必要なミドルウェアを設定します
+func configureMiddleware(e *echo.Echo) {
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 }
 
 func customFunc(todo *Todo) func([]string) []error {
@@ -75,6 +106,11 @@ func formatDateTime(d time.Time) string {
 }
 
 func main() {
+	// 環境変数の初期化
+	if err := initEnv(); err != nil {
+		log.Fatal(err)
+	}
+
 	sqldb, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Println(os.Getenv("DATABASE_URL"))
@@ -98,6 +134,16 @@ func main() {
 
 	e := echo.New()
 
+	// 環境変数からJWTシークレットを取得
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+
+	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwtv5.Claims {
+			return new(JwtCustomClaims)
+		},
+		SigningKey: jwtSecret,
+	})
+
 	e.Renderer = &Template{
 		templates: template.Must(template.New("").
 			Funcs(template.FuncMap{
@@ -105,7 +151,13 @@ func main() {
 			}).ParseFS(templates, "templates/*")),
 	}
 
-	e.GET("/", func(c echo.Context) error {
+	// パブリックルート: ログイン
+	e.POST("/login", login)
+
+	apiGroup := e.Group("/")
+	apiGroup.Use(jwtMiddleware)
+
+	apiGroup.GET("", func(c echo.Context) error {
 		var todos []Todo
 		ctx := context.Background()
 		err := db.NewSelect().Model(&todos).Order("created_at").Scan(ctx)
@@ -115,10 +167,12 @@ func main() {
 				Errors: []error{errors.New("Cannot get todos")},
 			})
 		}
-		return c.Render(http.StatusOK, "index", Data{Todos: todos})
+
+		// JSONを返す
+		return c.JSON(http.StatusOK, todos)
 	})
 
-	e.POST("/", func(c echo.Context) error {
+	apiGroup.POST("", func(c echo.Context) error {
 		var todo Todo
 		// フォームパラメータをフィールドにバインド
 		errs := echo.FormFieldBinder(c).
@@ -174,4 +228,43 @@ func main() {
 	fileServer := http.FileServer(http.FileSystem(http.FS(staticFs)))
 	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", fileServer)))
 	e.Logger.Fatal(e.Start(":8000"))
+}
+
+// loginはユーザー認証を行い、JWTトークンを生成して返します
+func login(c echo.Context) error {
+	// リクエストからユーザー情報を取得
+	email := c.FormValue("email")
+	password := c.FormValue("password")
+
+	// 簡易的な認証チェック（実際のアプリケーションではデータベースと連携）
+	if email != "user@example.com" || password != "password" {
+		log.Println("認証エラー:", email)
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "メールアドレスまたはパスワードが無効です"})
+	}
+
+	// JWTクレームの設定
+	claims := &JwtCustomClaims{
+		Email: email,
+		Name:  "User",
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			ExpiresAt: jwtv5.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			IssuedAt:  jwtv5.NewNumericDate(time.Now()),
+		},
+	}
+
+	// クレームを持つトークンを生成
+	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, claims)
+
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	// トークンを署名
+	t, err := token.SignedString(jwtSecret)
+	if err != nil {
+		log.Println("トークンの署名エラー:", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "トークンを生成できませんでした"})
+	}
+
+	// トークンを返す
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": t,
+	})
 }

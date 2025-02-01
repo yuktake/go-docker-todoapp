@@ -15,5 +15,4 @@ type Todo struct {
 	Until     time.Time `bun:"until,nullzero"`
 	CreatedAt time.Time
 	UpdatedAt time.Time `bun:",nullzero"`
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

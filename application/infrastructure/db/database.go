@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -51,19 +52,13 @@ func NewBunDB(sqldb *sql.DB) *bun.DB {
 
 // スキーマを作成する関数
 func CreateSchema(lc fx.Lifecycle, db *bun.DB) {
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			_, err := db.NewCreateTable().
-				Model((*Todo)(nil)).
-				IfNotExists().
-				Exec(ctx)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			return db.Close()
-		},
-	})
+	ctx := context.Background()
+	_, err := db.NewCreateTable().
+		Model((*Todo)(nil)).
+		IfNotExists().
+		Exec(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

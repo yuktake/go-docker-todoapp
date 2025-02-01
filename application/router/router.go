@@ -49,6 +49,9 @@ func RegisterRoutes(e *echo.Echo, todoHandler *handler.TodoHandler) {
 	apiGroup.GET("", todoHandler.GetTodos)
 
 	apiGroup.POST("todo", todoHandler.CreateTodo)
+	apiGroup.GET("todo/:id", todoHandler.GetTodo)
+	apiGroup.PATCH("todo/:id", todoHandler.UpdateTodo)
+	apiGroup.DELETE("todo/:id", todoHandler.DeleteTodo)
 }
 
 // loginはユーザー認証を行い、JWTトークンを生成して返します

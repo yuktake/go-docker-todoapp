@@ -10,6 +10,9 @@ import (
 type TodoRepository interface {
 	CreateTodo(todo *Todo) (Todo, error)
 	GetTodos() ([]Todo, error)
+	GetTodoByID(id string) (Todo, error)
+	UpdateTodo(todo Todo) (Todo, error)
+	DeleteTodoByID(id string) error
 }
 
 // 小文字始まりの構造体は非公開
@@ -39,6 +42,19 @@ func (r *todoRepository) CreateTodo(todo *Todo) (Todo, error) {
 	return *todo, nil
 }
 
+// Todo取得
+func (r *todoRepository) GetTodoByID(id string) (Todo, error) {
+	var todo Todo
+	ctx := context.Background()
+
+	err := r.DB.NewSelect().Model(&todo).Where("id = ?", id).Scan(ctx)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	return todo, nil
+}
+
 func (r *todoRepository) GetTodos() ([]Todo, error) {
 	// リポジトリからデータを取得
 	var todos []Todo
@@ -51,4 +67,26 @@ func (r *todoRepository) GetTodos() ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func (r *todoRepository) UpdateTodo(todo Todo) (Todo, error) {
+	ctx := context.Background()
+
+	_, err := r.DB.NewUpdate().Model(&todo).Where("id = ?", todo.ID).Exec(ctx)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func (r *todoRepository) DeleteTodoByID(id string) error {
+	ctx := context.Background()
+
+	_, err := r.DB.NewDelete().Model(&Todo{}).Where("id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

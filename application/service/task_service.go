@@ -1,9 +1,6 @@
 package service
 
 import (
-	"time"
-
-	"github.com/labstack/echo/v4"
 	"github.com/yuktake/todo-webapp/domain/todo"
 	"github.com/yuktake/todo-webapp/logger"
 
@@ -14,7 +11,10 @@ type Todo = todo.Todo
 
 type TodoService interface {
 	CreateTodo(todo Todo) (Todo, error)
+	GetTodoByID(id string) (Todo, error)
 	GetTodos() ([]Todo, error)
+	UpdateTodo(todo Todo) (Todo, error)
+	DeleteTodoByID(id string) error
 }
 
 type todoService struct {
@@ -44,6 +44,16 @@ func (s *todoService) CreateTodo(todo Todo) (Todo, error) {
 	return todo, nil
 }
 
+func (s *todoService) GetTodoByID(id string) (Todo, error) {
+	todo, err := s.repo.GetTodoByID(id)
+	if err != nil {
+		s.logger.Error("failed to get todo", err)
+		return Todo{}, err
+	}
+
+	return todo, nil
+}
+
 func (s *todoService) GetTodos() ([]Todo, error) {
 	todos, err := s.repo.GetTodos()
 	if err != nil {
@@ -54,16 +64,22 @@ func (s *todoService) GetTodos() ([]Todo, error) {
 	return todos, nil
 }
 
-func customFunc(todo *Todo) func([]string) []error {
-	return func(values []string) []error {
-		if len(values) == 0 || values[0] == "" {
-			return nil
-		}
-		dt, err := time.Parse("2006-01-02T15:04 MST", values[0]+" JST")
-		if err != nil {
-			return []error{echo.NewBindingError("until", values[0:1], "failed to decode time", err)}
-		}
-		todo.Until = dt
-		return nil
+func (s *todoService) UpdateTodo(todo Todo) (Todo, error) {
+	todo, err := s.repo.UpdateTodo(todo)
+	if err != nil {
+		s.logger.Error("failed to update todo", err)
+		return Todo{}, err
 	}
+
+	return todo, nil
+}
+
+func (s *todoService) DeleteTodoByID(id string) error {
+	err := s.repo.DeleteTodoByID(id)
+	if err != nil {
+		s.logger.Error("failed to delete todo", err)
+		return err
+	}
+
+	return nil
 }

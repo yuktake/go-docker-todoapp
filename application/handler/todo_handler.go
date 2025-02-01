@@ -45,6 +45,17 @@ func (h *TodoHandler) CreateTodo(c echo.Context) error {
 	return c.JSON(http.StatusCreated, newTodo)
 }
 
+func (h *TodoHandler) GetTodo(c echo.Context) error {
+	id := c.Param("id")
+	todo, err := h.Service.GetTodoByID(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// JSONを返す
+	return c.JSON(http.StatusOK, todo)
+}
+
 func (h *TodoHandler) GetTodos(c echo.Context) error {
 	var todos []Todo
 	todos, err := h.Service.GetTodos()
@@ -54,4 +65,45 @@ func (h *TodoHandler) GetTodos(c echo.Context) error {
 
 	// JSONを返す
 	return c.JSON(http.StatusOK, todos)
+}
+
+func (h *TodoHandler) UpdateTodo(c echo.Context) error {
+	id := c.Param("id")
+
+	todo, err := h.Service.GetTodoByID(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	err2 := c.Bind(&todo)
+	if err2 != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// サービスにTodo作成を依頼
+	newTodo, err3 := h.Service.UpdateTodo(todo)
+	if err3 != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// JSONを返す
+	return c.JSON(http.StatusOK, newTodo)
+}
+
+func (h *TodoHandler) DeleteTodo(c echo.Context) error {
+	id := c.Param("id")
+
+	_, err := h.Service.GetTodoByID(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// サービスにTodo削除を依頼
+	err2 := h.Service.DeleteTodoByID(id)
+	if err2 != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// JSONを返す
+	return c.JSON(http.StatusNoContent, nil)
 }

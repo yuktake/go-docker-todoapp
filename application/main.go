@@ -14,6 +14,7 @@ import (
 	"github.com/yuktake/todo-webapp/domain/todo"
 	"github.com/yuktake/todo-webapp/handler"
 	"github.com/yuktake/todo-webapp/infrastructure"
+	"github.com/yuktake/todo-webapp/logger"
 	"github.com/yuktake/todo-webapp/router"
 	"github.com/yuktake/todo-webapp/service"
 )
@@ -54,6 +55,7 @@ func main() {
 		handler.Module,
 		domain.Module,
 		router.Module,
+		logger.Module,
 		fx.Provide(NewEcho),
 		fx.Invoke(func(e *echo.Echo) {
 			e.Logger.Fatal(e.Start(":8000"))

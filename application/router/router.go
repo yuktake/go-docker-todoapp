@@ -48,7 +48,7 @@ func RegisterRoutes(e *echo.Echo, todoHandler *handler.TodoHandler) {
 
 	apiGroup.GET("", todoHandler.GetTodos)
 
-	apiGroup.POST("", todoHandler.CreateTodo)
+	apiGroup.POST("todo", todoHandler.CreateTodo)
 }
 
 // loginはユーザー認証を行い、JWTトークンを生成して返します
@@ -89,70 +89,6 @@ func login(c echo.Context) error {
 		"token": t,
 	})
 }
-
-// func getTodo(c echo.Context) error {
-// 	var todos []Todo
-// 	ctx := context.Background()
-// 	err := database.NewSelect().Model(&todos).Order("created_at").Scan(ctx)
-// 	if err != nil {
-// 		e.Logger.Error(err)
-// 		return c.Render(http.StatusBadRequest, "index", Data{
-// 			Errors: []error{errors.New("Cannot get todos")},
-// 		})
-// 	}
-
-// 	// JSONを返す
-// 	return c.JSON(http.StatusOK, todos)
-// }
-
-// func createTodo(c echo.Context) error {
-// 	var todo Todo
-// 	// フォームパラメータをフィールドにバインド
-// 	errs := echo.FormFieldBinder(c).
-// 		Int64("id", &todo.ID).
-// 		String("content", &todo.Content).
-// 		Bool("done", &todo.Done).
-// 		CustomFunc("until", customFunc(&todo)).
-// 		BindErrors()
-// 	if errs != nil {
-// 		e.Logger.Error(err)
-// 		return c.Render(http.StatusBadRequest, "index", Data{Errors: errs})
-// 	} else if todo.ID == 0 {
-// 		// ID が 0 の時は登録
-// 		ctx := context.Background()
-// 		if todo.Content == "" {
-// 			err = errors.New("Todo not found")
-// 		} else {
-// 			_, err = database.NewInsert().Model(&todo).Exec(ctx)
-// 			if err != nil {
-// 				e.Logger.Error(err)
-// 				err = errors.New("Cannot update")
-// 			}
-// 		}
-// 	} else {
-// 		ctx := context.Background()
-// 		if c.FormValue("delete") != "" {
-// 			// 削除
-// 			_, err = database.NewDelete().Model(&todo).Where("id = ?", todo.ID).Exec(ctx)
-// 		} else {
-// 			// 更新
-// 			var orig Todo
-// 			err = database.NewSelect().Model(&orig).Where("id = ?", todo.ID).Scan(ctx)
-// 			if err == nil {
-// 				orig.Done = todo.Done
-// 				_, err = database.NewUpdate().Model(&orig).Where("id = ?", todo.ID).Exec(ctx)
-// 			}
-// 		}
-// 		if err != nil {
-// 			e.Logger.Error(err)
-// 			err = errors.New("Cannot update")
-// 		}
-// 	}
-// 	if err != nil {
-// 		return c.Render(http.StatusBadRequest, "index", Data{Errors: []error{err}})
-// 	}
-// 	return c.Redirect(http.StatusFound, "/")
-// }
 
 // Fx Module
 var Module = fx.Module("router",

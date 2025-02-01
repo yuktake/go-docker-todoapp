@@ -1,12 +1,14 @@
 package todo
 
 import (
+	"context"
+
 	"github.com/uptrace/bun"
 	"go.uber.org/fx"
 )
 
 type TodoRepository interface {
-	CreateTodo() error
+	CreateTodo(todo *Todo) (Todo, error)
 	GetTodos() ([]Todo, error)
 }
 
@@ -26,10 +28,27 @@ func NewTodoRepository(params todoRepositoryParams) TodoRepository {
 }
 
 // Todo作成
-func (r *todoRepository) CreateTodo() error {
-	return nil
+func (r *todoRepository) CreateTodo(todo *Todo) (Todo, error) {
+	ctx := context.Background()
+
+	_, err := r.DB.NewInsert().Model(todo).Returning("*").Exec(ctx)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	return *todo, nil
 }
 
 func (r *todoRepository) GetTodos() ([]Todo, error) {
-	return nil, nil
+	// リポジトリからデータを取得
+	var todos []Todo
+	ctx := context.Background()
+
+	err := r.DB.NewSelect().Model(&todos).Order("created_at").Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return todos, nil
 }

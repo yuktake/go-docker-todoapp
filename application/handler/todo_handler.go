@@ -69,20 +69,20 @@ func (h *TodoHandler) GetTodos(c echo.Context) error {
 
 func (h *TodoHandler) UpdateTodo(c echo.Context) error {
 	id := c.Param("id")
-	content := c.FormValue("content")
-	done := c.FormValue("done")
 
 	todo, err := h.Service.GetTodoByID(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	todo.Content = content
-	todo.Done = done == "1"
+	err2 := c.Bind(&todo)
+	if err2 != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
 
 	// サービスにTodo作成を依頼
-	newTodo, err2 := h.Service.UpdateTodo(todo)
-	if err2 != nil {
+	newTodo, err3 := h.Service.UpdateTodo(todo)
+	if err3 != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 

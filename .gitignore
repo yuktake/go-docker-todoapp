@@ -2,6 +2,6 @@
 application/.env
 
 # Ignore the application air tmp main file
-application/tmp/main
+application/tmp/*
 
 .DS_Store

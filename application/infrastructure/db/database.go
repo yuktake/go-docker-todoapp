@@ -13,9 +13,11 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/yuktake/todo-webapp/domain/todo"
+	"github.com/yuktake/todo-webapp/domain/user"
 )
 
 type Todo = todo.Todo
+type User = user.User
 
 // DBConfig を提供
 type DBConfig struct {
@@ -55,6 +57,7 @@ func CreateSchema(lc fx.Lifecycle, db *bun.DB) {
 	ctx := context.Background()
 	_, err := db.NewCreateTable().
 		Model((*Todo)(nil)).
+		Model((*User)(nil)).
 		IfNotExists().
 		Exec(ctx)
 

@@ -17,6 +17,7 @@ import (
 	"github.com/yuktake/todo-webapp/logger"
 	"github.com/yuktake/todo-webapp/router"
 	"github.com/yuktake/todo-webapp/service"
+	"github.com/yuktake/todo-webapp/validator"
 )
 
 type Todo = todo.Todo
@@ -39,6 +40,7 @@ func NewEcho() *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Validator = validator.NewValidator()
 
 	return e
 }

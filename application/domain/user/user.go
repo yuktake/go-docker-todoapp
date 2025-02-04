@@ -14,7 +14,7 @@ type User struct {
 	ID        int64     `bun:"id,pk,autoincrement" json:"id"`
 	Name      string    `bun:"name,notnull" json:"name" validate:"required"`
 	Password  string    `bun:"password,notnull" json:"-"`
-	Email     string    `bun:"email,notnull" json:"email" validate:"required,email"`
+	Email     string    `bun:"email,notnull,unique" json:"email" validate:"required,email"`
 	CreatedAt time.Time `bun:"created_at,notnull"`
 	UpdatedAt time.Time `bun:"updated_at,notnull"`
 }

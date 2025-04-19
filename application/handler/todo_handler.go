@@ -37,6 +37,7 @@ func (h *TodoHandler) CreateTodo(c echo.Context) error {
 	}
 
 	todo := Todo{
+		UserID:  CreateTodoRequest.UserID,
 		Content: CreateTodoRequest.Content,
 		Done:    CreateTodoRequest.Done,
 	}

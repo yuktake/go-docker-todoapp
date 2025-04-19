@@ -1,9 +1,7 @@
 package db
 
 import (
-	"context"
 	"database/sql"
-	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -11,7 +9,6 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
-	"go.uber.org/fx"
 
 	"github.com/yuktake/todo-webapp/domain/todo"
 	"github.com/yuktake/todo-webapp/domain/user"
@@ -48,19 +45,4 @@ func NewBunDB(sqldb *sql.DB) *bun.DB {
 	))
 
 	return db
-}
-
-// スキーマを作成する関数
-func CreateSchema(lc fx.Lifecycle, db *bun.DB) {
-	ctx := context.Background()
-
-	for _, model := range []interface{}{(*User)(nil), (*Todo)(nil)} {
-		_, err := db.NewCreateTable().
-			Model(model).
-			IfNotExists().
-			Exec(ctx)
-		if err != nil {
-			log.Fatalf("failed to create table for %T: %v", model, err)
-		}
-	}
 }

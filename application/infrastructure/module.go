@@ -12,5 +12,4 @@ var Module = fx.Module("infrastructure",
 		db.InitDB,
 		db.NewBunDB,
 	),
-	fx.Invoke(db.CreateSchema),
 )

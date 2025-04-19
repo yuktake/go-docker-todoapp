@@ -5,6 +5,7 @@ import (
 )
 
 type CreateTodoRequest struct {
+	UserID  int64  `json:"user_id" validate:"required"`
 	Content string `json:"content" validate:"required"`
 	Done    bool   `json:"done"`
 }

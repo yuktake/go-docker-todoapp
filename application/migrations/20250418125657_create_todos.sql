@@ -1,0 +1,2 @@
+-- Create "todos" table
+CREATE TABLE "public"."todos" ("id" bigserial NOT NULL, "user_id" bigint NOT NULL, "content" character varying NOT NULL, "done" boolean NULL, "until" timestamptz NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "todos_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users" ("id") ON UPDATE RESTRICT ON DELETE RESTRICT);

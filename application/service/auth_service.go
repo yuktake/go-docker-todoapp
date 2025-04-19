@@ -4,6 +4,8 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/yuktake/todo-webapp/domain/auth"
 	"github.com/yuktake/todo-webapp/domain/user"
 	"github.com/yuktake/todo-webapp/logger"
@@ -54,4 +56,15 @@ func (s *authService) CreateToken(user user.User) (string, error) {
 
 	// トークンを返す
 	return t, nil
+}
+
+// 暗号化 (hash)
+func PasswordEncrypt(password string) (string, error) {
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hashPassword), err
+}
+
+// 暗号化パスワードと比較
+func CheckHashPassword(hashPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(password))
 }

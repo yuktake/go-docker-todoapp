@@ -1,16 +1,14 @@
 package db
 
 import (
-	"context"
 	"database/sql"
-	"log"
 	"os"
 
 	_ "github.com/lib/pq"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
-	"go.uber.org/fx"
 
 	"github.com/yuktake/todo-webapp/domain/todo"
 	"github.com/yuktake/todo-webapp/domain/user"
@@ -31,10 +29,7 @@ func NewDBConfig() DBConfig {
 }
 
 func InitDB(config DBConfig) (*sql.DB, error) {
-	sqldb, err := sql.Open("postgres", config.DNS)
-	if err != nil {
-		return nil, err
-	}
+	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(config.DNS)))
 
 	return sqldb, nil
 }
@@ -50,18 +45,4 @@ func NewBunDB(sqldb *sql.DB) *bun.DB {
 	))
 
 	return db
-}
-
-// スキーマを作成する関数
-func CreateSchema(lc fx.Lifecycle, db *bun.DB) {
-	ctx := context.Background()
-	_, err := db.NewCreateTable().
-		Model((*Todo)(nil)).
-		Model((*User)(nil)).
-		IfNotExists().
-		Exec(ctx)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 }

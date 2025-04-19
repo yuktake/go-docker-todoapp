@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
-
+	"github.com/yuktake/todo-webapp/domain/user"
+	"github.com/yuktake/todo-webapp/dto"
 	"github.com/yuktake/todo-webapp/service"
 
 	"github.com/labstack/echo/v4"
@@ -30,8 +30,8 @@ func NewAuthHandler(params authHandlerParams) *AuthHandler {
 }
 
 func (h *AuthHandler) Login(c echo.Context) error {
-	// リクエストのJSONをパース
-	req := new(User)
+	var req dto.LoginRequest
+
 	err := c.Bind(&req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -44,7 +44,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	// パスワードを比較
-	err2 := CheckHashPassword(user.Password, req.Password)
+	err2 := service.CheckHashPassword(user.Password, req.Password)
 	if err2 != nil {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "パスワードが違います"})
 	}
@@ -60,40 +60,48 @@ func (h *AuthHandler) Login(c echo.Context) error {
 }
 
 func (h *AuthHandler) Signup(c echo.Context) error {
-	var user User
+	var signup_request dto.SignupRequest
 
 	// リクエストのJSONをパース
-	err := c.Bind(&user)
+	err := c.Bind(&signup_request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	// バリデーション
+	err2 := c.Validate(signup_request)
+	if err2 != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": err2.Error()})
+	}
+
 	// パスワードを暗号化
-	hashPassword, err := PasswordEncrypt(user.Password)
+	hashPassword, err := service.PasswordEncrypt(signup_request.Password)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "パスワードの暗号化に失敗しました"})
 	}
-	user.Password = hashPassword
 
-	newUser, err := h.UserService.CreateUser(user)
-	if err != nil {
+	// dtoの値からUserエンティティを作成
+	user := user.User{
+		Name:     signup_request.Name,
+		Password: hashPassword,
+		Email:    signup_request.Email,
+	}
+
+	err3 := user.Validate()
+	if err3 != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": err3.Error()})
+	}
+
+	newUser, err4 := h.UserService.CreateUser(user)
+	if err4 != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "ユーザー登録に失敗しました"})
 	}
 
+	signup_response := dto.SignupResponse{
+		Message: "ユーザー登録が完了しました。ログインを行ってください",
+		User:    newUser,
+	}
+
 	// JSONを返す
-	return c.JSON(http.StatusCreated, echo.Map{
-		"message": "ユーザー登録が完了しました。ログインを行ってください",
-		"user":    newUser,
-	})
-}
-
-// 暗号化 (hash)
-func PasswordEncrypt(password string) (string, error) {
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hashPassword), err
-}
-
-// 暗号化パスワードと比較
-func CheckHashPassword(hashPassword, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(password))
+	return c.JSON(http.StatusCreated, signup_response)
 }

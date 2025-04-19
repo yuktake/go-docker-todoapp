@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/yuktake/todo-webapp/domain/todo"
+	"github.com/yuktake/todo-webapp/dto"
 	"github.com/yuktake/todo-webapp/service"
 
 	"github.com/labstack/echo/v4"
@@ -27,12 +28,18 @@ func NewTodoHandler(params todoHandlerParams) *TodoHandler {
 }
 
 func (h *TodoHandler) CreateTodo(c echo.Context) error {
-	var todo Todo
+	var CreateTodoRequest dto.CreateTodoRequest
 
 	// リクエストのJSONをパース
-	err := c.Bind(&todo)
+	err := c.Bind(&CreateTodoRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	todo := Todo{
+		UserID:  CreateTodoRequest.UserID,
+		Content: CreateTodoRequest.Content,
+		Done:    CreateTodoRequest.Done,
 	}
 
 	// サービスにTodo作成を依頼

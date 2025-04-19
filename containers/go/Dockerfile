@@ -8,6 +8,9 @@ RUN go mod init github.com/yuktake/go_crm
 # こっちのライブラリだと動かない（github.com/cosmtrek/air）
 RUN go install github.com/air-verse/air@latest
 
+# atlasをインストール
+RUN curl -sSf https://atlasgo.sh | sh
+
 COPY application/. /usr/local/go/src/go_crm/
 
 # ローカルでgolang:1.21.1で動かしていたものをgo.modのバージョンを変更して、go mod tidyを実行している

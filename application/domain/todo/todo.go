@@ -16,6 +16,8 @@ type Todo struct {
 	Until     time.Time `bun:"until,nullzero" json:"until"`
 	CreatedAt time.Time `bun:"created_at,notnull" json:"created_at"`
 	UpdatedAt time.Time `bun:"updated_at,notnull" json:"updated_at"`
+func (t *Todo) Indexes() []func(*bun.DB) *bun.CreateIndexQuery {
+	return []func(*bun.DB) *bun.CreateIndexQuery{}
 }
 
 // バリデーションメソッド（エンティティ自身でバリデーション）

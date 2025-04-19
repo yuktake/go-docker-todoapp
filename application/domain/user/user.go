@@ -19,6 +19,18 @@ type User struct {
 	UpdatedAt time.Time `bun:"updated_at,notnull"`
 }
 
+func (u *User) Indexes() []func(*bun.DB) *bun.CreateIndexQuery {
+	return []func(*bun.DB) *bun.CreateIndexQuery{
+		func(db *bun.DB) *bun.CreateIndexQuery {
+			return db.NewCreateIndex().
+				Model((*User)(nil)).
+				Index("user_email_idx").
+				Column("email").
+				Unique()
+		},
+	}
+}
+
 // バリデーションメソッド（エンティティ自身でバリデーション）
 func (u *User) Validate() error {
 	v := validator.New()

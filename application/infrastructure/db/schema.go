@@ -7,8 +7,18 @@ import (
 
 type IndexedModel = domain.IndexedModel
 
-func ModelsToByte(db *bun.DB, models []IndexedModel) []byte {
+// Schemaに生成するテーブルの構造体を定義
+func getIndexedModels() []IndexedModel {
+	return []IndexedModel{
+		(*User)(nil),
+		(*Todo)(nil),
+	}
+}
+
+func ModelsToByte(db *bun.DB) []byte {
 	var data []byte
+	models := getIndexedModels()
+
 	for _, model := range models {
 		query := db.NewCreateTable().Model(model).WithForeignKeys()
 		rawQuery, err := query.AppendQuery(db.Formatter(), nil)
@@ -21,16 +31,21 @@ func ModelsToByte(db *bun.DB, models []IndexedModel) []byte {
 	return data
 }
 
-func IndexesToByte(db *bun.DB, idxCreators []func(*bun.DB) *bun.CreateIndexQuery) []byte {
+func IndexesToByte(db *bun.DB) []byte {
 	var data []byte
-	for _, idxCreator := range idxCreators {
-		idx := idxCreator(db)
-		rawQuery, err := idx.AppendQuery(db.Formatter(), nil)
-		if err != nil {
-			panic(err)
+	models := getIndexedModels()
+	for _, model := range models {
+		idxCreators := model.Indexes()
+		for _, idxCreator := range idxCreators {
+			idx := idxCreator(db)
+			rawQuery, err := idx.AppendQuery(db.Formatter(), nil)
+			if err != nil {
+				panic(err)
+			}
+			data = append(data, rawQuery...)
+			data = append(data, ";\n"...)
 		}
-		data = append(data, rawQuery...)
-		data = append(data, ";\n"...)
 	}
+
 	return data
 }

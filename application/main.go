@@ -118,18 +118,11 @@ func main() {
 						}
 						defer fxApp.Stop(context.Background())
 
-						models := []IndexedModel{
-							(*User)(nil),
-							(*Todo)(nil),
-						}
-
-						sql := dbschema.ModelsToByte(db, models)
+						sql := dbschema.ModelsToByte(db)
 
 						// インデックスの生成
-						for _, model := range models {
-							index := dbschema.IndexesToByte(db, model.Indexes())
-							sql = append(sql, index...)
-						}
+						index := dbschema.IndexesToByte(db)
+						sql = append(sql, index...)
 
 						if err := os.WriteFile("schema.sql", sql, 0644); err != nil {
 							return fmt.Errorf("failed to write schema.sql: %w", err)

@@ -15,6 +15,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.1.14
 	github.com/urfave/cli/v2 v2.27.6
 	go.uber.org/fx v1.23.0
+	go.uber.org/mock v0.5.1
 	golang.org/x/crypto v0.35.0
 )
 

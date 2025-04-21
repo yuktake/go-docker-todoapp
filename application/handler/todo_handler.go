@@ -17,7 +17,7 @@ type TodoHandler struct {
 	Service service.TodoService
 }
 
-// `fx.In` で `TaskService` を DI
+// `fx.In` で `TodoService` を DI
 type todoHandlerParams struct {
 	fx.In
 	Service service.TodoService

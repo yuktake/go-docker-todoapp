@@ -22,7 +22,7 @@ type todoService struct {
 	logger logger.Logger
 }
 
-// `fx.In` で `TaskRepository` を自動 DI
+// `fx.In` で `TodoRepository` を自動 DI
 type todoServiceParams struct {
 	fx.In
 	Repo   todo.TodoRepository

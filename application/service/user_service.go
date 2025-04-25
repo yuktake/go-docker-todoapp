@@ -24,13 +24,13 @@ type userService struct {
 }
 
 // `fx.In` で `UserRepository` を自動 DI
-type userServiceParams struct {
+type UserServiceParams struct {
 	fx.In
 	Repo   user.UserRepository
 	Logger logger.Logger
 }
 
-func NewUserService(params userServiceParams) UserService {
+func NewUserService(params UserServiceParams) UserService {
 	return &userService{repo: params.Repo, logger: params.Logger}
 }
 

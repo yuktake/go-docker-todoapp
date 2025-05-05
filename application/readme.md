@@ -1,0 +1,38 @@
+**※English version is below (coming soon...)**
+
+## 概要
+* シンプルなTODOアプリ用APIです。
+* echoというWebアプリケーションフレームワークを使用しています。
+* 各パッケージで定義した構造体をfxというライブラリを使用してDIするようにしています。
+    * main.goを参照してください。
+
+## リクエストフロー
+![](https://private-user-images.githubusercontent.com/53438339/440369375-447263d5-8cc5-47fe-8cf9-927a201f0a55.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDY0NDgyNTAsIm5iZiI6MTc0NjQ0Nzk1MCwicGF0aCI6Ii81MzQzODMzOS80NDAzNjkzNzUtNDQ3MjYzZDUtOGNjNS00N2ZlLThjZjktOTI3YTIwMWYwYTU1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTA1VDEyMjU1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThhNTgyZTNiYmI1NjZkMmZiNGZiOTFlMWExNTdlYjI1NGUwZWYyZTZiYjlhNjQ4MDRhOGRiYjIzMTg4Y2NiMmEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ifUgbbTyt6ONZWAky9gbfj6ewflMGgNaOO0eSJ1TTMI)
+
+## マイグレーション
+![](https://private-user-images.githubusercontent.com/53438339/440377326-49f88ca7-7f46-41ae-a9a5-e1f6be5f7d1e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDY0NDk0MDMsIm5iZiI6MTc0NjQ0OTEwMywicGF0aCI6Ii81MzQzODMzOS80NDAzNzczMjYtNDlmODhjYTctN2Y0Ni00MWFlLWE5YTUtZTFmNmJlNWY3ZDFlLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTA1VDEyNDUwM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTk1ZDcyNTlmYTU0YzhiYzExZGI3MzU4ZDRiMTcwMzYxMDk3ZjYxY2I4NjkwYzZlMzI0ODVmZmVhNzc4ZTgxYTkmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ibdwy7D2yDjPBCdwKuYVyc_zi4j_2TM9XDK13HBoBeY)
+
+## テスト
+* assertionのためにtestingを使用
+* モックやスタブはgomockを使用
+
+### 単体テスト
+* /tests/domain/
+* ドメインのビジネスロジックをテストする
+
+### 統合テスト
+* /tests/service
+* mock構造体は/mock/
+* 統合テストは並列実行を考慮していない
+    * 実行時間の長さよりも並列を実現するためのダミーデータの管理の方が煩雑だという考え
+    * 保守性を優先
+    * 各テストケースの前処理でトランザクションデータ（マスタデータ以外）をすべて削除する処理を実行する
+* リポジトリのテストは統合テストを通じて行う
+
+### E2Eテスト
+* /tests/e2e/
+* テストクライアントはhttptestを使用
+* E2Eテストは並列実行を考慮していない
+    * 実行時間の長さよりも並列を実現するためのダミーデータの管理の方が煩雑だという考え
+    * 保守性を優先
+    * 各テストケースの前処理でトランザクションデータ（マスタデータ以外）をすべて削除する処理を実行する

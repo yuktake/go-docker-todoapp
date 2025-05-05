@@ -8,7 +8,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/uptrace/bun"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/fx"
@@ -19,10 +18,10 @@ import (
 	"github.com/yuktake/todo-webapp/handler"
 	"github.com/yuktake/todo-webapp/infrastructure"
 	dbschema "github.com/yuktake/todo-webapp/infrastructure/db"
+	"github.com/yuktake/todo-webapp/internal"
 	"github.com/yuktake/todo-webapp/logger"
 	"github.com/yuktake/todo-webapp/router"
 	"github.com/yuktake/todo-webapp/service"
-	"github.com/yuktake/todo-webapp/validator"
 )
 
 type Todo = todo.Todo
@@ -43,15 +42,6 @@ func initEnv() error {
 	return nil
 }
 
-func NewEcho() *echo.Echo {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Validator = validator.NewValidator()
-
-	return e
-}
-
 func main() {
 	if err := initEnv(); err != nil {
 		log.Fatal(err)
@@ -66,7 +56,7 @@ func main() {
 			domain.Module,
 			router.Module,
 			logger.Module,
-			fx.Provide(NewEcho),
+			internal.Module,
 			fx.Invoke(func(e *echo.Echo) {
 				e.Logger.Fatal(e.Start(":8000"))
 			}),
@@ -91,7 +81,7 @@ func main() {
 							domain.Module,
 							router.Module,
 							logger.Module,
-							fx.Provide(NewEcho),
+							internal.Module,
 							fx.Invoke(func(e *echo.Echo) {
 								e.Logger.Fatal(e.Start(":8000"))
 							}),

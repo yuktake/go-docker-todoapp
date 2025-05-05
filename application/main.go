@@ -123,6 +123,30 @@ func main() {
 						return nil
 					},
 				},
+				{
+					Name:  "seed",
+					Usage: "Seed the database",
+					Action: func(c *cli.Context) error {
+						fmt.Println("Seeding database...")
+						var db *bun.DB
+
+						// 依存解決だけしたいので fx.Populate を使う
+						var fxApp = fx.New(
+							infrastructure.Module,
+							fx.Populate(&db),
+						)
+						if err := fxApp.Start(context.Background()); err != nil {
+							return fmt.Errorf("failed to start fx: %w", err)
+						}
+						defer fxApp.Stop(context.Background())
+
+						// データベースのシーディング処理をここに追加
+						dbschema.SeedData(db)
+						fmt.Println("Database seeded")
+
+						return nil
+					},
+				},
 			},
 		}
 

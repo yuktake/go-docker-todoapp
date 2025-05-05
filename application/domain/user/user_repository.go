@@ -35,7 +35,7 @@ func NewUserRepository(params userRepositoryParams) UserRepository {
 func (r *userRepository) CreateUser(user *User) (User, error) {
 	ctx := context.Background()
 
-	_, err := r.DB.NewInsert().Model(user).Returning("*").Exec(ctx)
+	err := r.DB.NewInsert().Model(user).Returning("*").Scan(ctx)
 	if err != nil {
 		return User{}, err
 	}

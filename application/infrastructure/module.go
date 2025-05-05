@@ -13,3 +13,11 @@ var Module = fx.Module("infrastructure",
 		db.NewBunDB,
 	),
 )
+
+var TestModule = fx.Module("infrastructure",
+	fx.Provide(
+		db.NewTestDBConfig,
+		db.InitDB,
+		db.NewBunDB,
+	),
+)

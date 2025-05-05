@@ -22,14 +22,14 @@ type todoService struct {
 	logger logger.Logger
 }
 
-// `fx.In` で `TaskRepository` を自動 DI
-type todoServiceParams struct {
+// `fx.In` で `TodoRepository` を自動 DI
+type TodoServiceParams struct {
 	fx.In
 	Repo   todo.TodoRepository
 	Logger logger.Logger
 }
 
-func NewTodoService(params todoServiceParams) TodoService {
+func NewTodoService(params TodoServiceParams) TodoService {
 	return &todoService{repo: params.Repo, logger: params.Logger}
 }
 

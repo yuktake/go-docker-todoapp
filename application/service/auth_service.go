@@ -23,12 +23,12 @@ type authService struct {
 }
 
 // `fx.In` で `UserRepository` を自動 DI
-type authServiceParams struct {
+type AuthServiceParams struct {
 	fx.In
 	Logger logger.Logger
 }
 
-func NewAuthService(params authServiceParams) AuthService {
+func NewAuthService(params AuthServiceParams) AuthService {
 	return &authService{logger: params.Logger}
 }
 

@@ -21,12 +21,12 @@ type todoRepository struct {
 }
 
 // `fx.In` で `bun.DB` を自動 DI
-type todoRepositoryParams struct {
+type TodoRepositoryParams struct {
 	fx.In
 	DB *bun.DB
 }
 
-func NewTodoRepository(params todoRepositoryParams) TodoRepository {
+func NewTodoRepository(params TodoRepositoryParams) TodoRepository {
 	return &todoRepository{DB: params.DB}
 }
 

@@ -28,6 +28,12 @@ func NewDBConfig() DBConfig {
 	}
 }
 
+func NewTestDBConfig() DBConfig {
+	return DBConfig{
+		DNS: os.Getenv("TEST_DATABASE_URL"),
+	}
+}
+
 func InitDB(config DBConfig) (*sql.DB, error) {
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(config.DNS)))
 

@@ -12,6 +12,10 @@ import (
 )
 
 func TestTodoService_CreateTodo_Success(t *testing.T) {
+	// 前処理
+	// 他のテストで生成されたデータを削除する
+	CleanupAllTables(testDB)
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -30,4 +34,6 @@ func TestTodoService_CreateTodo_Success(t *testing.T) {
 	// モックの期待値と実際の結果を比較
 	assert.NoError(t, err)
 	assert.Equal(t, todo, createdTodo)
+
+	// 後処理
 }
